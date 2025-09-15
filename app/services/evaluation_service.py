@@ -50,7 +50,7 @@ async def evaluate_single_question(question: str, top_k: int = 5) -> Dict[str, A
     
     # Step 1: Retrieval
     retrieval_start = time.time()
-    question_embedding = embed_texts_gemini([question])[0]
+    question_embedding = embed_texts_gemini([question], for_query=True)[0]
     retrieved_results = query_vectors(question_embedding, top_k=top_k)
     retrieval_time = time.time() - retrieval_start
     
@@ -445,7 +445,7 @@ async def generate_test_questions_from_documents(count: int = 5) -> List[str]:
         query_terms = ["information", "data", "content", "document", "text"]
         for term in query_terms:
             try:
-                query_embedding = embed_texts_gemini([term])
+                query_embedding = embed_texts_gemini([term], for_query=True)
                 if query_embedding:
                     results = index.query(
                         vector=query_embedding[0],

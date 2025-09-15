@@ -13,7 +13,7 @@ async def _stream_generator(question: str, retrieved: list):
     yield f"data: {json.dumps({'type':'done'})}\n\n"
 
 def handle_query_stream(question: str, top_k: int = 5) -> Generator:
-    emb = embed_texts_gemini([question])[0]
+    emb = embed_texts_gemini([question], for_query=True)[0]
     res = query_vectors(emb, top_k=top_k)
     retrieved = []
     matches = res.get('matches') or []

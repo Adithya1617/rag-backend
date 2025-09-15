@@ -12,9 +12,13 @@ logger = logging.getLogger(__name__)
 
 # Use the best free Hugging Face embedding model
 # Options for different use cases:
-# - 'sentence-transformers/all-MiniLM-L6-v2': Fast, lightweight (384 dim) - CURRENT
-# - 'sentence-transformers/all-mpnet-base-v2': Better quality (768 dim) - RECOMMENDED FOR PRODUCTION
+# - 'BAAI/bge-small-en-v1.5': High-quality retrieval model (384 dim) - CURRENT
+# - 'sentence-transformers/all-MiniLM-L6-v2': Fast, lightweight (384 dim) - Alternative
+# - 'sentence-transformers/all-mpnet-base-v2': Better quality (768 dim) - Higher resource usage
 # - 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2': Multilingual support (384 dim)
+
+# Default model - BAAI BGE optimized for retrieval tasks
+MODEL_NAME = os.getenv('EMBEDDING_MODEL', 'BAAI/bge-small-en-v1.5')
 # - 'BAAI/bge-small-en-v1.5': State-of-the-art small model (384 dim) - BEST QUALITY/SPEED BALANCE
 EMBEDDING_MODEL_NAME = os.getenv('EMBEDDING_MODEL_NAME', 'BAAI/bge-small-en-v1.5')
 
@@ -28,7 +32,7 @@ try:
 except Exception as e:
     logger.error(f"Failed to load embedding model: {e}")
     logger.info("Falling back to all-MiniLM-L6-v2")
-    embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+    embedding_model = SentenceTransformer('BAAI/bge-small-en-v1.5')
     EMBEDDING_DIM = 384
 
 def _batch(lst, n):
@@ -36,43 +40,25 @@ def _batch(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i+n]
 
-def embed_texts_gemini(texts: List[str], batch_size: int = 32) -> List[List[float]]:
+def embed_texts_gemini(texts: List[str], for_query: bool = False) -> List[List[float]]:
     """
-    Embed texts using Hugging Face sentence transformers.
+    Embed texts using Hugging Face sentence transformers with BGE formatting.
     
     Args:
         texts: List of texts to embed
-        batch_size: Number of texts to process in each batch (default: 32)
-    
-    Returns:
-        List of embedding vectors (dimensions depend on the model)
+        for_query: If True, format as queries; if False, format as passages
     """
-    logger.info(f"Embedding {len(texts)} texts using Hugging Face model...")
+    # Format texts for BAAI/bge models for optimal performance
+    if for_query:
+        # Prefix queries for better retrieval performance
+        formatted_texts = [f"query: {text}" for text in texts]
+    else:
+        # Prefix passages/documents
+        formatted_texts = [f"passage: {text}" for text in texts]
     
     try:
-        # Process texts in batches for better memory management
-        all_embeddings = []
-        
-        for i, batch in enumerate(_batch(texts, batch_size)):
-            logger.info(f"Processing batch {i+1}/{(len(texts) + batch_size - 1) // batch_size}")
-            
-            # Get embeddings for the batch
-            batch_embeddings = embedding_model.encode(
-                batch,
-                convert_to_tensor=False,  # Return numpy arrays
-                normalize_embeddings=True,  # Normalize for better similarity search
-                show_progress_bar=False,
-                batch_size=batch_size  # Explicit batch size for memory control
-            )
-            
-            # Convert to list of lists
-            for embedding in batch_embeddings:
-                all_embeddings.append(embedding.tolist())
-        
-        logger.info(f"Successfully embedded {len(texts)} texts")
-        return all_embeddings
-        
+        embeddings = embedding_model.encode(formatted_texts, convert_to_tensor=False)
+        return embeddings.tolist()
     except Exception as e:
-        logger.error(f"Error embedding texts with Hugging Face model: {e}")
-        # Return zero vectors as fallback using the actual model dimension
-        return [[0.0] * EMBEDDING_DIM for _ in texts]
+        logging.error(f"Error generating embeddings: {e}")
+        raise

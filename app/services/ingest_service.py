@@ -26,7 +26,7 @@ def process_file_background(path: str, filename: str, source_name: str, max_toke
         chunks = chunk_text(text, max_tokens=max_tokens, overlap=overlap)
         # embed in sub-batches using Gemini
         texts = [c['text'] for c in chunks]
-        embeddings = embed_texts_gemini(texts, batch_size=200)
+        embeddings = embed_texts_gemini(texts, for_query=False)
         for i, c in enumerate(chunks):
             c['embedding'] = embeddings[i]
         vectors = _prepare_vectors(source_name, chunks)
