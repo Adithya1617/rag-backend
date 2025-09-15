@@ -1,0 +1,72 @@
+# ------------------------
+# Python
+# ------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+*.manifest
+*.spec
+
+# ------------------------
+# Virtual Environment
+# ------------------------
+.venv/
+env/
+venv/
+ENV/
+pip-wheel-metadata/
+
+# ------------------------
+# IDE / Editor
+# ------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ------------------------
+# OS files
+# ------------------------
+.DS_Store
+Thumbs.db
+
+# ------------------------
+# Logs & Cache
+# ------------------------
+*.log
+*.out
+*.err
+logs/
+cache/
+__cache__/
+
+# ------------------------
+# Environment / Secrets
+# ------------------------
+.env
+.env.local
+.env.*.local
+
+# ------------------------
+# Test / Coverage
+# ------------------------
+htmlcov/
+.tox/
+.nox/
+.coverage
+coverage.*
+.pytest_cache/
+
+# ------------------------
+# Railway / Docker
+# ------------------------
+.dockerignore
+docker-compose.override.yml
