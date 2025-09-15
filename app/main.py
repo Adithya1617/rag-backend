@@ -9,7 +9,7 @@ app = FastAPI(title="RAG Chatbot Backend (Gemini)")
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://rag-chatbot-orpin-phi.vercel.app/",  # Replace with your actual Vercel URL
+    "https://rag-frontend-3nag.vercel.app",  # Replace with your actual Vercel URL
     "https://*.vercel.app",  # Allow all Vercel preview deployments
 ]
 
